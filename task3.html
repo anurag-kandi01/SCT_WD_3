@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic-Tac-Toe Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin: 20px 0;
+    }
+
+    #mode {
+      margin-bottom: 15px;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 12px;
+      margin: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .cell:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    #status {
+      font-size: 1.4rem;
+      margin: 20px;
+      font-weight: 500;
+      color: #f0f0f0;
+    }
+
+    @media (max-width: 500px) {
+      .board {
+        grid-template-columns: repeat(3, 80px);
+      }
+      .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic-Tac-Toe</h1>
+  <div id="mode">
+    <button onclick="setMode('2P')">2 Players</button>
+    <button onclick="setMode('CPU')">Vs Computer</button>
+  </div>
+  <div class="board" id="board"></div>
+  <p id="status"></p>
+  <button onclick="resetGame()">Reset Game</button>
+
+  <script>
+    let board = Array(9).fill("");
+    let currentPlayer = "X";
+    let gameOver = false;
+    let mode = "2P";
+
+    const boardDiv = document.getElementById("board");
+    const statusDiv = document.getElementById("status");
+
+    function setMode(selectedMode) {
+      mode = selectedMode;
+      resetGame();
+    }
+
+    function renderBoard() {
+      boardDiv.innerHTML = "";
+      board.forEach((cell, index) => {
+        const cellDiv = document.createElement("div");
+        cellDiv.className = "cell";
+        cellDiv.innerText = cell;
+        cellDiv.addEventListener("click", () => handleClick(index));
+        boardDiv.appendChild(cellDiv);
+      });
+    }
+
+    function handleClick(index) {
+      if (board[index] !== "" || gameOver) return;
+
+      board[index] = currentPlayer;
+      renderBoard();
+      if (checkWinner()) {
+        statusDiv.innerText = `${currentPlayer} wins!`;
+        gameOver = true;
+        return;
+      } else if (!board.includes("")) {
+        statusDiv.innerText = "It's a draw!";
+        gameOver = true;
+        return;
+      }
+
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+
+      if (mode === "CPU" && currentPlayer === "O") {
+        setTimeout(computerMove, 500);
+      }
+    }
+
+    function computerMove() {
+      const emptyIndices = board
+        .map((val, i) => (val === "" ? i : null))
+        .filter(i => i !== null);
+      const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      handleClick(randomIndex);
+    }
+
+    function checkWinner() {
+      const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+        [0, 4, 8], [2, 4, 6]             // diagonals
+      ];
+      return winPatterns.some(pattern =>
+        pattern.every(i => board[i] === currentPlayer)
+      );
+    }
+
+    function resetGame() {
+      board = Array(9).fill("");
+      currentPlayer = "X";
+      gameOver = false;
+      statusDiv.innerText = "";
+      renderBoard();
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
